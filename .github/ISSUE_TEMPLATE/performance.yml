@@ -1,0 +1,69 @@
+name: ⚡ Производительность
+description: Сообщить о проблеме с производительностью или зависаниях
+labels: ["performance"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Лаунчер тормозит или работает медленнее, чем ожидалось? Расскажи подробнее.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Описание проблемы
+      placeholder: "При запуске игры лаунчер зависает на 10 секунд..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги для воспроизведения
+      placeholder: |
+        1. Открыть лаунчер
+        2. Выбрать версию ...
+        3. Нажать «Играть»
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+      placeholder: "Запуск должен занимать не более 2 секунд"
+    validations:
+      required: true
+
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Метрики / замеры
+      description: Если есть — время выполнения, загрузка CPU/RAM, логи профилировщика
+
+  - type: input
+    id: version
+    attributes:
+      label: Версия BarsikLauncher
+      placeholder: "например: 1.2.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Версия Python
+      placeholder: "например: 3.11.4"
+
+  - type: input
+    id: os
+    attributes:
+      label: Дистрибутив Linux
+      placeholder: "например: Ubuntu 22.04 / Arch Linux / Fedora 39"
+    validations:
+      required: true
+
+  - type: input
+    id: hardware
+    attributes:
+      label: Железо
+      placeholder: "например: RAM 8 ГБ, CPU i5-10400"
