@@ -1,0 +1,36 @@
+name: ✨ Запрос функции
+description: Предложить новую функцию или улучшение
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Есть идея? Расскажи о ней!
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую проблему решает эта функция?
+      placeholder: "Сейчас неудобно делать X, потому что..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Предлагаемое решение
+      placeholder: "Было бы здорово, если бы..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Альтернативы
+      description: Рассматривал ли другие варианты решения?
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Дополнительный контекст
+      description: Скриншоты, ссылки, примеры из других проектов — всё, что поможет понять идею
