@@ -4,3 +4,4 @@ BarsikLauncher.spec
 build/
 logs/
 web/
+scripts/
