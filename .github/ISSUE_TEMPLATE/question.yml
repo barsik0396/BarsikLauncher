@@ -1,0 +1,28 @@
+name: ❓ Вопрос
+description: Задать вопрос по использованию или разработке
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Прежде чем задать вопрос, проверь [документацию](../../README.md) и [закрытые Issues](../../issues?q=is%3Aissue+is%3Aclosed).
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Вопрос
+      placeholder: "Как сделать X?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: Что уже пробовал?
+      description: Расскажи, что уже пробовал и что не получилось
+
+  - type: input
+    id: version
+    attributes:
+      label: Версия BarsikLauncher
+      placeholder: "например: 1.2.0"
