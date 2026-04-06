@@ -1,0 +1,63 @@
+name: 🐛 Баг
+description: Сообщить о баге или некорректном поведении
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо, что сообщаешь о проблеме! Заполни форму как можно подробнее.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Описание бага
+      description: Что происходит и чего ты ожидал?
+      placeholder: "Когда я делаю X, происходит Y, хотя должно быть Z."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги для воспроизведения
+      placeholder: |
+        1. Открыть лаунчер
+        2. Нажать на ...
+        3. Увидеть ошибку
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Скриншоты / логи
+      description: Если есть — прикрепи сюда
+
+  - type: input
+    id: version
+    attributes:
+      label: Версия BarsikLauncher
+      placeholder: "например: 1.2.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Версия Python
+      placeholder: "например: 3.11.4"
+
+  - type: input
+    id: os
+    attributes:
+      label: Дистрибутив Linux
+      placeholder: "например: Ubuntu 22.04 / Arch Linux / Fedora 39"
+    validations:
+      required: true
