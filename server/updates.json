@@ -1,0 +1,43 @@
+{
+    "latest": {
+        "main": "1.0.0+blapi-v1.0-main",
+        "preview": "1.0.0+blapi-v1.0-preview",
+        "nightly": "1.0.1+blapi-v1.0-nightly"
+    },
+    "versions": {
+        "1.0.0+blapi-v1.0-main": {
+            "supported": true,
+            "updates": {
+                "EF6GH1": {
+                    "type": "new-version", // new-version - новая версия, new-api - новая версия API, fix - исправление бага/безопасности
+                    "name": "Обновление BarsikLauncher до версии 1.0.1",
+                    "description": null, // если null - описание не будет отображаться
+                    "downloads": {
+                        "linux": {
+                            "type": "binary",
+                            "url": "https://github.com/barsik0396/BarsikLauncher/releases/download/1.0.1-stable%2Bblapi-v1.1/BarsikLauncher",
+                            "require-auth": false,
+                            "required-updates": ["GH1PD6"],
+                            "size": 94600 // Размер в килобайтах
+                        }
+                    }
+                },
+                "GH1PD6": {
+                    "type": "new-api",
+                    "name": "Новая версия API для BarsikLauncher 1.0.1",
+                    "description": null,
+                    "downloads": {
+                        "linux": {
+                            "type": "tar-gz",
+                            "url": "https://github.com/barsik0396/BarsikLauncher/releases/download/1.0.1-stable%2Bblapi-v1.1/barsiklauncher-api_linux.tar.gz",
+                            "unzip-to": "/",
+                            "required-updates": ["EF6GH1"],
+                            "require-auth": true, // Чтобы он мог распаковать архив в /
+                            "size": 115
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
