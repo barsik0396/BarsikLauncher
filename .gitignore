@@ -6,3 +6,4 @@ logs/
 web/
 scripts/
 include/
+__pycache__/
