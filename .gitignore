@@ -1,3 +1,4 @@
+# Чуть хлама
 venv/
 dist/
 BarsikLauncher.spec
@@ -7,3 +8,8 @@ web/
 scripts/
 include/
 __pycache__/
+install.py
+
+# Артефакты сборки
+deb/*.deb
+deb/1.0.1-v1.1-n2/usr/bin/barsiklauncher

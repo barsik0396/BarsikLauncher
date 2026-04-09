@@ -1,0 +1,15 @@
+Package: barsiklauncher
+Version: 1.0.1
+Architecture: amd64
+Maintainer: Barsik0396 <Barsik0396@outlook.com>
+Description: BarsikLauncher — быстрый и простой Minecraft-лаунчер
+ BarsikLauncher это простой,
+ минимальный и лёгкий лаунчер
+ для Minecraft.
+ .
+ Он написан на Python 3.12.
+Section: games
+Priority: optional
+Homepage: https://github.com/barsik0396/BarsikLauncher
+Installed-Size: 9
+Bugs: https://github.com/barsik0396/BarsikLauncher/issues
