@@ -1,0 +1,37 @@
+/*
+    Стиль для BarsikLauncher Docs
+    Написал: barsik0396
+    Pull Request: #8
+*/
+
+body {
+    background-color: black;
+}
+
+.h1-title {
+    display: block;
+    color: white;
+    font-family: monospace, 'Open Sans', 'FreeSans';
+    text-align: center;
+    transition: color 0.4s ease, transform 0.5s, filter 0.1s;
+    &:hover {
+        transform: translateY(-5px);
+        color: grey;
+        cursor: default;
+        filter: blur(1px)
+    }
+}
+.h1-title-hint {
+    display: block;
+    color: rgb(39, 39, 39);
+    font-family: monospace, 'Open Sans', 'FreeSans';
+    text-align: center;
+    transition: color 0.4s ease, transform 0.5s, filter 0.2s, font-size 0.3s;
+    &:hover {
+        transform: translateY(-5px);
+        font-size: 19px;
+        color: white;
+        cursor: default;
+        filter: blur(0.6px)
+    }
+}
