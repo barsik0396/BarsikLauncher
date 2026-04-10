@@ -1,7 +1,15 @@
+import logging
+import os
 import subprocess
 
 from PySide6.QtCore import QThread, Signal
 import minecraft_launcher_lib
+
+logging.basicConfig(
+    filename="barsik_debug.log",
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s %(message)s"
+)
 
 
 class LaunchWorker(QThread):
@@ -35,7 +43,21 @@ class LaunchWorker(QThread):
             command = minecraft_launcher_lib.command.get_minecraft_command(
                 self.version, self.minecraft_dir, options
             )
-            subprocess.Popen(command)
+
+            logging.debug(f"Command: {command}")
+            logging.debug(f"PATH: {os.environ.get('PATH')}")
+
+            proc = subprocess.Popen(
+                command,
+                env=os.environ.copy(),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            stdout, stderr = proc.communicate()
+            logging.debug(f"stdout: {stdout.decode(errors='replace')}")
+            logging.debug(f"stderr: {stderr.decode(errors='replace')}")
+
             self.finished.emit()
         except Exception as e:
+            logging.exception(f"Error: {e}")
             self.error.emit(str(e))
