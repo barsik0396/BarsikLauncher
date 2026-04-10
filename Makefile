@@ -25,7 +25,7 @@ help:
 build:
 	@echo "== BarsikLauncher Builder"
 	@echo "== Создал: @barsik0396"
-	@echo "== PR сборщика: #8"
+	@echo "== PR сборщика: #10"
 	@echo ""
 	@echo "--> (30) Подготовка к сборке"
 	@echo "1: BLMake-WARN (31): "
