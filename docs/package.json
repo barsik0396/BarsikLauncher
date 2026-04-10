@@ -1,0 +1,29 @@
+{
+  "name": "barsiklauncher-docs",
+  "version": "0.1.0-nightly",
+  "description": "Локальная документация для BarsikLauncher",
+  "main": "main.js",
+  "author": "barsik0396",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --dir"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "dev.barsik0396.barsiklauncher.docs",
+    "productName": "BarsikLauncher Docs",
+    "files": [
+      "**/*"
+    ],
+    "linux": {
+      "target": [
+        "dir"
+      ],
+      "category": "Games"
+    }
+  }
+}
