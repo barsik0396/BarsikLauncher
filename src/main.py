@@ -24,6 +24,7 @@ def print_help() -> None:
 {C_BOLD}Опции:{C_RESET}
   {C_YELLOW}-p{C_RESET}, {C_YELLOW}--path{C_RESET} {C_CYAN}<путь>{C_RESET}   Путь к папке Minecraft
                        {C_GRAY}(по умолчанию: ~/.minecraft){C_RESET}
+  {C_YELLOW}-s{C_RESET}, {C_YELLOW}--skip-splash{C_RESET}   Пропустить баннер при запуске
   {C_YELLOW}-h{C_RESET}, {C_YELLOW}--help{C_RESET}          Показать это сообщение
 
 {C_BOLD}Доступные версии:{C_RESET}
@@ -31,14 +32,17 @@ def print_help() -> None:
 """)
 
 
-def parse_args() -> str | None:
+def parse_args() -> tuple[str | None, bool]:
     args = sys.argv[1:]
     minecraft_path = None
+    skip_splash = False
 
     i = 0
     while i < len(args):
         arg = args[i]
-        if arg in ("-h", "--help"):
+        if arg in ("-s", "--skip-splash"):
+            skip_splash = True
+        elif arg in ("-h", "--help"):
             print_help()
             sys.exit(0)
         elif arg in ("-p", "--path"):
@@ -53,18 +57,21 @@ def parse_args() -> str | None:
             sys.exit(1)
         i += 1
 
-    return minecraft_path
+    return minecraft_path, skip_splash
 
 
 def main():
-    minecraft_path = parse_args()
+    minecraft_path, skip_splash = parse_args()
     minecraft_dir = minecraft_path or minecraft_launcher_lib.utils.get_minecraft_directory()
 
     app = QApplication(sys.argv)
 
     window = MainWindow(minecraft_dir)
-    splash = SplashScreen(on_done=window.show, duration_ms=1500)
-    splash.show()
+    if skip_splash:
+        window.show()
+    else:
+        splash = SplashScreen(on_done=window.show, duration_ms=1500)
+        splash.show()
 
     sys.exit(app.exec())
 
