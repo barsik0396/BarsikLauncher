@@ -9,6 +9,7 @@ import minecraft_launcher_lib
 
 from constants import VERSION, VERSIONS, C_RESET, C_BOLD, C_CYAN, C_GREEN, C_YELLOW, C_GRAY
 from gui import MainWindow
+from splash import SplashScreen
 
 
 def print_help() -> None:
@@ -60,8 +61,11 @@ def main():
     minecraft_dir = minecraft_path or minecraft_launcher_lib.utils.get_minecraft_directory()
 
     app = QApplication(sys.argv)
+
     window = MainWindow(minecraft_dir)
-    window.show()
+    splash = SplashScreen(on_done=window.show, duration_ms=1500)
+    splash.show()
+
     sys.exit(app.exec())
 
 
