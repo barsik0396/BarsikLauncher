@@ -1,6 +1,9 @@
 # 🐱 BarsikLauncher
 
-> Лаунчер для Minecraft на Python
+<div align="center">
+
+**Простой. Быстрый. Бесплатный.**
+Minecraft-лаунчер для Linux, который не мешает играть.
 
 [![Version](https://img.shields.io/badge/version-1.0.0--stable-brightgreen)](https://github.com/barsik0396/BarsikLauncher/releases)
 [![API Version](https://img.shields.io/badge/blapi-v1.0-blue)](https://github.com/barsik0396/BarsikLauncher)
@@ -14,13 +17,36 @@
 [![Stars](https://img.shields.io/github/stars/barsik0396/BarsikLauncher)](https://github.com/barsik0396/BarsikLauncher/stargazers)
 [![Forks](https://img.shields.io/github/forks/barsik0396/BarsikLauncher)](https://github.com/barsik0396/BarsikLauncher/network/members)
 
-## 📖 О проекте
+</div>
 
-BarsikLauncher — простой и бесплатный Minecraft-лаунчер для Linux. Никаких лишних функций: только выбор версии, ввод ника и запуск игры. Написан на Python с использованием PySide6 для интерфейса и minecraft_launcher_lib для запуска Minecraft.
+---
+
+## 🎮 Почему BarsikLauncher?
+
+Большинство Minecraft-лаунчеров перегружены: аккаунты, моды, профили, облака, подписки...
+BarsikLauncher делает ровно одно — **запускает Minecraft**. Без лишнего.
+
+| | 🐱 BarsikLauncher | TLauncher | KLauncher | MultiMC |
+|---|---|---|---|---|
+| 💸 Цена | Бесплатно | Бесплатно | Бесплатно | Бесплатно |
+| 🐧 Платформа | Linux | Windows, macOS, Linux | Windows, Linux | Windows, macOS, Linux |
+| ⚡ Интерфейс | Минималистичный | Перегруженный | Чуть перегруженный | Средний |
+| 📢 Реклама | Нет | Много | Серверы и автодобавление | Нет |
+| 🔓 Тип | Open-source | Закрытый | Закрытый | Open-source |
+| 🌍 Популярность | Низкая | Очень высокая | Нормальная | Высокая |
+| 🎨 Кастомизация | Минимальная | Нет | Минимальная | Высокая |
+
+---
+
+## 📸 Скриншоты
+
+![Главная страница](https://barsiklauncher.pages.dev/assets/main_page.png)
+
+---
 
 ## 🚀 Установка
 
-### Бинарка (рекомендуется)
+### Binary (рекомендуется)
 
 ```bash
 # Скачать бинарку
@@ -33,7 +59,7 @@ chmod +x BarsikLauncher
 ./BarsikLauncher
 ```
 
-### Из исходников
+### From source
 
 ```bash
 # Клонировать репозиторий
@@ -53,19 +79,47 @@ chmod +x BarsikLauncher
 ./BarsikLauncher
 ```
 
-## 🛠 Требования
+---
+
+## 🛠 Requirements
 
 - Python 3.x
 - Зависимости из `requirements.txt` (`pip install -r requirements.txt --break-system-packages`)
 
+---
+
+## ❓ FAQ
+
+**Лаунчер бесплатный?**
+Да, полностью. Без скрытых платежей и подписок.
+
+**Поддерживается ли Windows / macOS?**
+Нет. BarsikLauncher разработан исключительно для Linux.
+
+**Нужен аккаунт для игры?**
+Нет. BarsikLauncher работает в офлайн-режиме — авторизация не требуется.
+
+**Что такое blapi?**
+BarsikLauncher API — внутренняя библиотека, на которой работает лаунчер.
+
+---
+
 ## 🤝 Участие в разработке
 
-Хочешь помочь? Читай [CONTRIBUTING.md](CONTRIBUTING.md).
+Хочешь помочь проекту? Читай [CONTRIBUTING.md](CONTRIBUTING.md) — там всё, что нужно знать.
 
 ## 🔒 Безопасность
 
-Нашёл уязвимость? Читай [SECURITY.md](SECURITY.md).
+Нашёл уязвимость? Не создавай публичный Issue — читай [SECURITY.md](SECURITY.md).
 
 ## 📋 Changelog
 
-История изменений — в [CHANGELOG.md](CHANGELOG.md).
+История всех изменений — в [CHANGELOG.md](CHANGELOG.md).
+
+---
+
+<div align="center">
+
+Сделано с ❤️ и 🐱
+
+</div>
