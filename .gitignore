@@ -12,3 +12,4 @@ deb/1.0.1-v1.1-n2/usr/bin/barsiklauncher
 dist/
 package-lock.json
 node_modules/
+deb/1.0.1-v1.1-n2/opt/BarsikLauncher-Docs/
