@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>FAQ — BarsikLauncher Docs 📘</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+</head>
+<body>
+    <script>hljs.highlightAll();</script>
+    <script src="script.js"></script>
+    <script>
+        window.api.log("привет")
+    </script>
+    <div class="sidebar">
+        <p>BarsikLauncher</p>
+        <a href="index.html">Главная</a>
+        <a href="update.html">Обновление</a>
+        <a class="active" href="faq.html">> FAQ</a>
+        <a href="usage.html">Использование</a>
+    </div>
+    <div class="main-content">
+        <h1 class="title">Часто-задаваемые вопросы</h1>
+        <section id="1">
+            <h1>Открылась командная строка при запуске лаунчера</h1>
+            <p>Проблема частая. Скорее всего просто не хватает прав на запуск.<p>
+            <p>Решение: Открыть терминал и написать:</p>
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Копировать</button>
+                <pre><code class="language-bash">
+cd Загрузки/    # Ну или как там она у вас называется
+chmod +x BarsikLauncher # Даёт права на запуск
+                </code></pre>
+            </div>
+            <p>Тогда проблемы должны пропасть.</p>
+        </section>
+        <section id="2">
+            <h1>Ошибка "Версия уже установлена" при обновлении</h1>
+            <p>Проблема тоже частая. Причина - ограничения установщика.</p>
+            <p>Решение: Открыть терминал и написать:</p>
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Копировать</button>
+                <pre><code class="language-bash">
+sudo apt remove barsiklauncher
+rm ~/.barsiklauncher/version.txt
+                </code></pre>
+            </div>
+            <p>И потом уже пробовать установить.</p>
+        </section>
+    </div>
+</body>
+</html>

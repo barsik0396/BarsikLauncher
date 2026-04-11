@@ -18,9 +18,6 @@ help:
 	@echo " - \033[32muninstall\033[0m:  удалить, если установлен из исходников (надо \033[31mзапуск от sudo\033[0m)"
 	@echo " - \033[32minfo\033[0m:       информация о BarsikLauncher"
 	@echo "===================================="
-	@mkdir ~/.barsiklauncher-mktmp
-	@echo "]]]]]]]]]]]]" > ~/.barsiklauncher-mktmp/ed894u3
-	@rm -rf ~/.barsiklauncher-mktmp
 
 build:
 	@echo "== BarsikLauncher Builder"

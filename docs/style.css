@@ -1,37 +1,255 @@
 /*
     Стиль для BarsikLauncher Docs
     Написал: barsik0396
-    Pull Request: #10
 */
 
+/* Чёрный фон, белый текст и без отступа */
 body {
+    margin: 0;
     background-color: black;
+    color: white;
 }
 
-.h1-title {
+/* Сайдбар */
+.sidebar {
+    width:  200px;
+    background: #0d1f31;
+    color: white;
+    position: fixed;
+    height: 100%;
+    padding: 20px 0;
+    box-sizing: border-box;
+    font-family: 'OpenSans', monospace, 'JetBrains Mono';
+}
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px 20px;
+}
+.sidebar p {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px 20px;
+}
+.sidebar a:hover {
+    background: #011929;
+}
+.sidebar .active {
+    background: #031218;
+}
+.sidebar .sub {
+    background: #041b38;
+    height: 20px;
+    padding: 5px 35px;
+    font-size: 15px
+}
+
+/* Баннер */
+
+.banner {
+    margin-left: 200px;
+    padding: 0px;
+}
+.banner-message {
+    color: white;
+    background: rgb(216, 195, 7);
+    margin-top: 0px;
+    padding: 5px
+}
+
+/* Основной контент - смещается */
+.main-content {
+    margin-left: 200px;
+    padding: 20px;
+}
+
+/* Заголовок */
+.title {
     display: block;
     color: white;
-    font-family: monospace, 'Open Sans', 'FreeSans';
+    font-family: 'JetBrains Mono', monospace;
+    transition: transform 0.3s, filter 0.2s ease, color 0.4s ease;
     text-align: center;
-    transition: color 0.4s ease, transform 0.5s, filter 0.1s;
-    &:hover {
-        transform: translateY(-5px);
-        color: grey;
-        cursor: default;
-        filter: blur(1px)
-    }
 }
-.h1-title-hint {
-    display: block;
-    color: rgb(39, 39, 39);
-    font-family: monospace, 'Open Sans', 'FreeSans';
-    text-align: center;
-    transition: color 0.4s ease, transform 0.5s, filter 0.2s, font-size 0.3s;
-    &:hover {
-        transform: translateY(-5px);
-        font-size: 19px;
-        color: white;
-        cursor: default;
-        filter: blur(0.6px)
-    }
+.title:hover {
+    transform: translateY(-5px);
+    color: #b1b1b1;
+    filter: blur(1px);
+    cursor: default;
+}
+
+/* Текста */
+/* h1 */
+h1 {
+    font-family: Arial, 'Open Sans';
+    transition: color 0.2s ease;
+}
+h1:hover {
+    color: #dddddd
+}
+h1:active {
+    color: #4796d6b7
+}
+/* h2 */
+h2 {
+    font-family: Arial, 'Open Sans';
+    transition: color 0.2s ease;
+}
+h2:hover {
+    color: #dddddd
+}
+/* h3 */
+h3 {
+    font-family: Arial, 'Open Sans';
+    transition: color 0.2s ease;
+}
+h3:hover {
+    color: #dddddd
+}
+/* h4 */
+h4 {
+    font-family: Arial, 'Open Sans';
+    transition: color 0.2s ease;
+}
+h4:hover {
+    color: #dddddd
+}
+/* h5 */
+h5 {
+    font-family: Arial, 'Open Sans';
+    transition: color 0.2s ease;
+}
+h5:hover {
+    color: #dddddd
+}
+/* h6 */
+h6 {
+    font-family: Arial, 'Open Sans';
+    transition: color 0.2s ease;
+}
+h6:hover {
+    color: #dddddd
+}
+
+/* p */
+p {
+    font-family: Arial, 'Open Sans', 'Ubuntu', system-ui;
+    transition: color 0.2s ease;
+}
+p:active {
+    color: rgb(37, 10, 160);
+}
+
+/* Кнопка */
+button {
+    background: #092633;
+    border: none;
+    color: white;
+    padding: 5px 20px;
+    cursor: pointer;
+    text-align: left;
+    width: 40%;
+}
+button:hover {
+    background: #196597;
+}
+
+.update-try {
+    background: #0f519c;
+    border: none;
+    border-radius: 30px;
+    color: white;
+    padding: 10px 20px;
+    cursor: pointer;
+    text-align: left;
+    width: 40%;
+    transition: background-color 0.3s ease;
+}
+.update-try:hover {
+    background-color: #1038e9;
+}
+
+/* Релизы */
+.version {
+    color: white;
+    font-family: Arial, 'Ubuntu', system-ui;
+}
+.latest-badge {
+    border: 1px solid #000000;
+    border-radius: 4px;
+    background-color: green;
+    padding: 3px 5px;
+    width: 15%;
+    height: auto;
+}
+.latest-badge:hover {
+    cursor: default;
+}
+.nightly-badge {
+    border: 1px solid #000000;
+    border-radius: 4px;
+    background-color: rgb(125, 12, 148);
+    padding: 3px 5px;
+    width: 15%;
+    height: auto;
+}
+.nightly-badge:hover {
+    cursor: default;
+}
+.stable-badge {
+    border: 1px solid #000000;
+    border-radius: 4px;
+    background-color: rgb(65, 163, 20);
+    padding: 3px 5px;
+    width: 15%;
+    height: auto;
+}
+.stable-badge:hover {
+    cursor: default;
+}
+
+.green {
+    color: green;
+}
+.red {
+    color: red;
+}
+
+/* Код */
+code {
+    color: rgb(212, 212, 212);
+    font-family: 'JetBrains Mono';
+}
+.code-block {
+    position: relative; /* Для позиционирования кнопки */
+    background: #282c34;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 10px 0;
+    overflow: auto; /* Прокрутка, если код длинный */
+}
+.code-block pre {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family: 'JetBrains Mono', monospace;
+    color: #abb2bf;
+    line-height: 1.5;
+}
+.copy-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 3px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.copy-button:hover {
+    background: #2980b9;
 }
