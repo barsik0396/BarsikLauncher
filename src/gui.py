@@ -1,12 +1,17 @@
+import os
+
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QComboBox, QLineEdit, QPushButton, QStatusBar, QProgressBar, QLabel
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QMovie
 
 from worker import LaunchWorker
 from constants import VERSION, VERSIONS
+
+ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+LOADING_GIF = os.path.join(ASSETS_DIR, "loading.gif")
 
 
 class MainWindow(QMainWindow):
@@ -51,13 +56,30 @@ class MainWindow(QMainWindow):
         self.path_label.setToolTip(self.minecraft_dir)
         layout.addWidget(self.path_label)
 
-        # Progress bar
+        # Progress bar + loading gif side by side
+        progress_row = QHBoxLayout()
+        progress_row.setSpacing(6)
+
         self.progress_bar = QProgressBar()
         self.progress_bar.setFixedHeight(4)
         self.progress_bar.setTextVisible(False)
         self.progress_bar.setValue(0)
         self.progress_bar.setMaximum(100)
-        layout.addWidget(self.progress_bar)
+        progress_row.addWidget(self.progress_bar)
+
+        self.loading_label = QLabel()
+        self.loading_label.setFixedSize(18, 18)
+        self.loading_label.setVisible(False)
+        progress_row.addWidget(self.loading_label)
+
+        self._movie = None
+        if os.path.exists(LOADING_GIF):
+            self._movie = QMovie(LOADING_GIF)
+            self._movie.setScaledSize(self.loading_label.size())
+            self._movie.setSpeed(200)
+            self.loading_label.setMovie(self._movie)
+
+        layout.addLayout(progress_row)
 
         # Launch button
         self.launch_btn = QPushButton("Играть")
@@ -71,6 +93,14 @@ class MainWindow(QMainWindow):
         self.status_bar.showMessage(f"BarsikLauncher {VERSION}")
         self.setStatusBar(self.status_bar)
 
+    def _set_loading(self, active: bool) -> None:
+        self.loading_label.setVisible(active)
+        if self._movie:
+            if active:
+                self._movie.start()
+            else:
+                self._movie.stop()
+
     def _on_launch(self):
         username = self.nick_input.text().strip()
         if not username:
@@ -82,6 +112,7 @@ class MainWindow(QMainWindow):
         self.progress_bar.setValue(0)
         self._progress_max = 100
         self.status_bar.showMessage("Подготовка...")
+        self._set_loading(True)
 
         self._launch_worker = LaunchWorker(version, username, self.minecraft_dir)
         self._launch_worker.progress.connect(self._on_progress)
@@ -99,10 +130,12 @@ class MainWindow(QMainWindow):
             self.status_bar.showMessage(status)
 
     def _on_finished(self):
+        self._set_loading(False)
         self.progress_bar.setValue(self._progress_max)
         self.status_bar.showMessage("Игра запущена!")
         self.launch_btn.setEnabled(True)
 
     def _on_error(self, message: str):
+        self._set_loading(False)
         self.status_bar.showMessage(f"Ошибка: {message[:70]}")
         self.launch_btn.setEnabled(True)
