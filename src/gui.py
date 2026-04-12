@@ -9,14 +9,31 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QMovie, QPainter, QPen
 
 from worker import LaunchWorker
-from constants import VERSION, VERSIONS
+from constants import VERSION
 import config as cfg
+from versions import load_versions
 
 ASSETS_DIR  = os.path.join(os.path.dirname(__file__), "assets")
 LOADING_GIF = os.path.join(ASSETS_DIR, "loading.gif")
 
-FABRIC_VERSIONS = ["1.16.5", "1.20.1", "1.21.1", "1.21.2", "1.21.4", "1.21.5"]
-FORGE_VERSIONS  = ["1.12.2", "1.16.5", "1.20.1", "1.21.1", "1.21.4"]
+ALL_VERSIONS, FABRIC_VERSIONS, FORGE_VERSIONS = load_versions()
+
+# Разбиваем версии по типам
+def _classify(versions: list[str]) -> tuple[list[str], list[str], list[str], list[str]]:
+    releases, snapshots, betas, alphas = [], [], [], []
+    for v in versions:
+        vl = v.lower()
+        if "alpha" in vl:
+            alphas.append(v)
+        elif "beta" in vl or "b" in vl.split(".")[0]:
+            betas.append(v)
+        elif any(c.isalpha() for c in v.replace("-", "").replace(".", "")):
+            snapshots.append(v)
+        else:
+            releases.append(v)
+    return releases, snapshots, betas, alphas
+
+RELEASES, SNAPSHOTS, BETAS, ALPHAS = _classify(ALL_VERSIONS)
 
 
 class DropButton(QPushButton):
@@ -154,23 +171,41 @@ class MainWindow(QMainWindow):
     def _open_version_menu(self):
         menu = QMenu(self)
 
-        for v in VERSIONS:
-            action = menu.addAction(v)
-            action.triggered.connect(lambda checked, ver=v: self._select(ver, None))
+        def add_versions(parent, versions, loader=None):
+            for v in versions:
+                action = parent.addAction(v)
+                action.triggered.connect(
+                    lambda checked, ver=v, ld=loader: self._select(ver, ld)
+                )
+
+        # Релизы
+        add_versions(menu, RELEASES)
+
+        # Снапшоты
+        if SNAPSHOTS:
+            snap_menu = menu.addMenu(Снапшоты)
+            add_versions(snap_menu, SNAPSHOTS)
+
+        # Беты
+        if BETAS:
+            beta_menu = menu.addMenu(Беты)
+            add_versions(beta_menu, BETAS)
+
+        # Альфы
+        if ALPHAS:
+            alpha_menu = menu.addMenu(Альфы)
+            add_versions(alpha_menu, ALPHAS)
 
         menu.addSeparator()
 
-        modloaders = menu.addMenu("Модлоадеры")
+        # Модлоадеры
+        modloaders = menu.addMenu(Модлоадеры)
 
-        fabric_menu = modloaders.addMenu("Fabric")
-        for v in FABRIC_VERSIONS:
-            action = fabric_menu.addAction(v)
-            action.triggered.connect(lambda checked, ver=v: self._select(ver, "fabric"))
+        fabric_menu = modloaders.addMenu(Fabric)
+        add_versions(fabric_menu, FABRIC_VERSIONS, fabric)
 
-        forge_menu = modloaders.addMenu("Forge")
-        for v in FORGE_VERSIONS:
-            action = forge_menu.addAction(v)
-            action.triggered.connect(lambda checked, ver=v: self._select(ver, "forge"))
+        forge_menu = modloaders.addMenu(Forge)
+        add_versions(forge_menu, FORGE_VERSIONS, forge)
 
         menu.exec(self.version_btn.mapToGlobal(self.version_btn.rect().bottomLeft()))
 
