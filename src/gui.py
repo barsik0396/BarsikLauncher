@@ -183,29 +183,29 @@ class MainWindow(QMainWindow):
 
         # Снапшоты
         if SNAPSHOTS:
-            snap_menu = menu.addMenu(Снапшоты)
+            snap_menu = menu.addMenu("Снапшоты")
             add_versions(snap_menu, SNAPSHOTS)
 
         # Беты
         if BETAS:
-            beta_menu = menu.addMenu(Беты)
+            beta_menu = menu.addMenu("Беты")
             add_versions(beta_menu, BETAS)
 
         # Альфы
         if ALPHAS:
-            alpha_menu = menu.addMenu(Альфы)
+            alpha_menu = menu.addMenu("Альфы")
             add_versions(alpha_menu, ALPHAS)
 
         menu.addSeparator()
 
         # Модлоадеры
-        modloaders = menu.addMenu(Модлоадеры)
+        modloaders = menu.addMenu("Модлоадеры")
 
-        fabric_menu = modloaders.addMenu(Fabric)
-        add_versions(fabric_menu, FABRIC_VERSIONS, fabric)
+        fabric_menu = modloaders.addMenu("Fabric")
+        add_versions(fabric_menu, FABRIC_VERSIONS, "fabric")
 
-        forge_menu = modloaders.addMenu(Forge)
-        add_versions(forge_menu, FORGE_VERSIONS, forge)
+        forge_menu = modloaders.addMenu("Forge")
+        add_versions(forge_menu, FORGE_VERSIONS, "forge")
 
         menu.exec(self.version_btn.mapToGlobal(self.version_btn.rect().bottomLeft()))
 
