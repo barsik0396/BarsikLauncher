@@ -6,69 +6,61 @@
 import minecraft_launcher_lib
 import config as cfg
 
-# Захардкоренный fallback
-FALLBACK_VERSIONS = [
-    "1.12.2",
-    "1.16",
-    "1.16.5",
-    "1.20.1",
-    "1.21.1",
-    "1.21.2",
-    "1.21.4",
-    "1.21.5",
-    "1.21.10",
-    "26.1",
-]
+FALLBACK_VERSIONS = {
+    "release":  ["1.12.2", "1.16", "1.16.5", "1.20.1", "1.21.1", "1.21.2", "1.21.4", "1.21.5", "1.21.10", "26.1"],
+    "snapshot": [],
+    "old_beta": [],
+    "old_alpha": [],
+}
 
 FABRIC_FALLBACK = ["1.16.5", "1.20.1", "1.21.1", "1.21.2", "1.21.4", "1.21.5"]
 FORGE_FALLBACK  = ["1.12.2", "1.16.5", "1.20.1", "1.21.1", "1.21.4"]
 
 
-def _fetch_from_network() -> tuple[list[str], list[str], list[str]]:
-    """Получает все версии MC, Fabric-совместимые и Forge-совместимые из сети."""
+def _fetch_from_network() -> tuple[dict, list[str], list[str]]:
     all_versions = minecraft_launcher_lib.utils.get_version_list()
 
-    mc_versions = [v["id"] for v in all_versions]
+    by_type = {"release": [], "snapshot": [], "old_beta": [], "old_alpha": []}
+    for v in all_versions:
+        t = v.get("type", "release")
+        if t in by_type:
+            by_type[t].append(v["id"])
 
     fabric_versions = [
-        v["id"]
-        for v in minecraft_launcher_lib.fabric.get_all_minecraft_versions()
-        if v.get("stable", False) or True
+        v["id"] for v in minecraft_launcher_lib.fabric.get_all_minecraft_versions()
     ]
 
     forge_versions = minecraft_launcher_lib.forge.list_forge_versions()
     forge_mc = list(dict.fromkeys(v.split("-")[0] for v in forge_versions))
 
-    return mc_versions, fabric_versions, forge_mc
+    return by_type, fabric_versions, forge_mc
 
 
-def load_versions() -> tuple[list[str], list[str], list[str]]:
+def load_versions() -> tuple[dict, list[str], list[str]]:
     """
-    Возвращает (mc_versions, fabric_versions, forge_versions).
-    Обновляет кэш в конфиге при успешном получении из сети.
+    Возвращает (by_type, fabric_versions, forge_versions).
+    by_type = {"release": [...], "snapshot": [...], "old_beta": [...], "old_alpha": [...]}
     """
     try:
-        mc, fabric, forge = _fetch_from_network()
+        by_type, fabric, forge = _fetch_from_network()
         data = cfg.load()
         data["versions_cache"] = {
-            "mc":     mc,
-            "fabric": fabric,
-            "forge":  forge,
+            "by_type": by_type,
+            "fabric":  fabric,
+            "forge":   forge,
         }
         cfg.save(data)
-        return mc, fabric, forge
+        return by_type, fabric, forge
     except Exception:
         pass
 
-    # Пробуем кэш из конфига
     data = cfg.load()
     cache = data.get("versions_cache")
     if cache:
         return (
-            cache.get("mc",     FALLBACK_VERSIONS),
-            cache.get("fabric", FABRIC_FALLBACK),
-            cache.get("forge",  FORGE_FALLBACK),
+            cache.get("by_type", FALLBACK_VERSIONS),
+            cache.get("fabric",  FABRIC_FALLBACK),
+            cache.get("forge",   FORGE_FALLBACK),
         )
 
-    # Полный fallback
     return FALLBACK_VERSIONS, FABRIC_FALLBACK, FORGE_FALLBACK

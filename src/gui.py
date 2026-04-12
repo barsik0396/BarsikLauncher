@@ -16,24 +16,11 @@ from versions import load_versions
 ASSETS_DIR  = os.path.join(os.path.dirname(__file__), "assets")
 LOADING_GIF = os.path.join(ASSETS_DIR, "loading.gif")
 
-ALL_VERSIONS, FABRIC_VERSIONS, FORGE_VERSIONS = load_versions()
-
-# Разбиваем версии по типам
-def _classify(versions: list[str]) -> tuple[list[str], list[str], list[str], list[str]]:
-    releases, snapshots, betas, alphas = [], [], [], []
-    for v in versions:
-        vl = v.lower()
-        if "alpha" in vl:
-            alphas.append(v)
-        elif "beta" in vl or "b" in vl.split(".")[0]:
-            betas.append(v)
-        elif any(c.isalpha() for c in v.replace("-", "").replace(".", "")):
-            snapshots.append(v)
-        else:
-            releases.append(v)
-    return releases, snapshots, betas, alphas
-
-RELEASES, SNAPSHOTS, BETAS, ALPHAS = _classify(ALL_VERSIONS)
+_BY_TYPE, FABRIC_VERSIONS, FORGE_VERSIONS = load_versions()
+RELEASES  = _BY_TYPE.get("release",   [])
+SNAPSHOTS = _BY_TYPE.get("snapshot",  [])
+BETAS     = _BY_TYPE.get("old_beta",  [])
+ALPHAS    = _BY_TYPE.get("old_alpha", [])
 
 
 class DropButton(QPushButton):
