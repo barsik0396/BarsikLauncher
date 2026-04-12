@@ -5,10 +5,11 @@ CONFIG_DIR  = os.path.join(os.path.expanduser("~"), ".BarsikLauncher")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 
 DEFAULTS = {
-    "nick":         "",
-    "version":      "1.21.4",
-    "loader":       None,
+    "nick":          "",
+    "version":       "1.21.4",
+    "loader":        None,
     "beta_features": False,
+    "versions_cache": None,
 }
 
 
