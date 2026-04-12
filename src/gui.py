@@ -59,6 +59,10 @@ class MainWindow(QMainWindow):
         self._picker_win = None
 
         self.setWindowTitle("BarsikLauncher")
+
+        from PySide6.QtWidgets import QApplication
+        QApplication.instance().focusChanged.connect(self._on_focus_changed)
+        QApplication.instance().installEventFilter(self)
         self.setFixedSize(360, self._base_h)
         self._center()
 
@@ -168,11 +172,38 @@ class MainWindow(QMainWindow):
                 current_loader  = self._selected_loader,
             )
             self._picker_win.version_chosen.connect(self._on_version_chosen)
+        else:
+            # Обновляем текущую версию чтобы эмодзи обновилось
+            self._picker_win.update_current(self._selected_version, self._selected_loader)
+            self._picker_win._refresh()
 
-        # Позиционируем прямо под кнопкой версии
-        btn_pos = self.version_btn.mapToGlobal(self.version_btn.rect().bottomLeft())
-        self._picker_win.move(btn_pos)
+        self._reposition_picker()
         self._picker_win.show()
+
+    def eventFilter(self, obj, event):
+        from PySide6.QtCore import QEvent
+        if event.type() == QEvent.ApplicationDeactivate:
+            if self._picker_win:
+                self._picker_win.hide()
+        return super().eventFilter(obj, event)
+
+    def _on_focus_changed(self, old, new):
+        if not self._picker_win or not self._picker_win.isVisible():
+            return
+        # Скрываем если фокус ушёл не в пикер и не в лаунчер
+        if new is None:
+            return
+        w = new
+        while w is not None:
+            if w is self._picker_win or w is self:
+                return
+            w = w.parent()
+        self._picker_win.hide()
+
+    def _reposition_picker(self):
+        if self._picker_win:
+            btn_pos = self.version_btn.mapToGlobal(self.version_btn.rect().bottomLeft())
+            self._picker_win.move(btn_pos)
 
     def _on_version_chosen(self, vid, loader):
         self._select(vid, loader)
@@ -185,8 +216,21 @@ class MainWindow(QMainWindow):
         self._save_config()
 
     def closeEvent(self, event):
+        if self._picker_win:
+            self._picker_win.close()
         self._save_config()
         event.accept()
+
+    def changeEvent(self, event):
+        from PySide6.QtCore import QEvent
+        if event.type() == QEvent.WindowStateChange:
+            if self.isMinimized() and self._picker_win:
+                self._picker_win.hide()
+        super().changeEvent(event)
+
+    def moveEvent(self, event):
+        self._reposition_picker()
+        super().moveEvent(event)
 
     def _center(self) -> None:
         screen = self.screen().availableGeometry()
