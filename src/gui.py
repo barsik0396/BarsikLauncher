@@ -3,7 +3,7 @@ import subprocess
 
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLineEdit, QPushButton, QStatusBar, QProgressBar, QLabel, QMenu
+    QLineEdit, QPushButton, QStatusBar, QProgressBar, QLabel
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QMovie, QPainter, QPen
@@ -11,16 +11,17 @@ from PySide6.QtGui import QFont, QMovie, QPainter, QPen
 from worker import LaunchWorker
 from constants import VERSION
 import config as cfg
+import minecraft_launcher_lib
 from versions import load_versions
+from version_picker import VersionPickerWindow
 
 ASSETS_DIR  = os.path.join(os.path.dirname(__file__), "assets")
 LOADING_GIF = os.path.join(ASSETS_DIR, "loading.gif")
 
-_BY_TYPE, FABRIC_VERSIONS, FORGE_VERSIONS = load_versions()
-RELEASES  = _BY_TYPE.get("release",   [])
-SNAPSHOTS = _BY_TYPE.get("snapshot",  [])
-BETAS     = _BY_TYPE.get("old_beta",  [])
-ALPHAS    = _BY_TYPE.get("old_alpha", [])
+_BY_TYPE, FABRIC_VERSIONS, FORGE_VERSIONS, _SIZES, _LATEST = load_versions()
+
+BASE_HEIGHT = 210
+BETA_HEIGHT = 242
 
 
 class DropButton(QPushButton):
@@ -44,26 +45,30 @@ class DropButton(QPushButton):
 class MainWindow(QMainWindow):
     def __init__(self, minecraft_dir: str):
         super().__init__()
-        self.minecraft_dir = minecraft_dir
+        self.minecraft_dir  = minecraft_dir
         self._launch_worker = None
         self._progress_max  = 100
+        self._picker_win = None
 
         self._conf = cfg.load()
         self._selected_version = self._conf.get("version", "1.21.4")
         self._selected_loader  = self._conf.get("loader", None)
         self._beta             = self._conf.get("beta_features", False)
 
+        self._base_h = BETA_HEIGHT if self._beta else BASE_HEIGHT
+        self._picker_win = None
+
         self.setWindowTitle("BarsikLauncher")
+        self.setFixedSize(360, self._base_h)
         self._center()
-        self.setFixedSize(360, 210 if not self._beta else 242)
 
         central = QWidget()
         self.setCentralWidget(central)
-        layout = QVBoxLayout(central)
-        layout.setContentsMargins(16, 14, 16, 8)
-        layout.setSpacing(8)
+        self._main_layout = QVBoxLayout(central)
+        self._main_layout.setContentsMargins(16, 14, 16, 8)
+        self._main_layout.setSpacing(8)
 
-        # Top row: nick + version + settings button
+        # Top row: nick + version + settings
         top_row = QHBoxLayout()
         top_row.setSpacing(8)
 
@@ -79,7 +84,7 @@ class MainWindow(QMainWindow):
         self.version_btn.setStyleSheet(
             "QPushButton { text-align: left; padding-left: 6px; padding-right: 18px; }"
         )
-        self.version_btn.clicked.connect(self._open_version_menu)
+        self.version_btn.clicked.connect(self._toggle_picker)
         top_row.addWidget(self.version_btn, stretch=2)
 
         self.settings_btn = QPushButton("⚙")
@@ -87,7 +92,7 @@ class MainWindow(QMainWindow):
         self.settings_btn.clicked.connect(self._open_settings)
         top_row.addWidget(self.settings_btn)
 
-        layout.addLayout(top_row)
+        self._main_layout.addLayout(top_row)
 
         # Minecraft dir display
         self.path_label = QLabel(self.minecraft_dir)
@@ -96,7 +101,7 @@ class MainWindow(QMainWindow):
         self.path_label.setStyleSheet("color: gray;")
         self.path_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.path_label.setToolTip(self.minecraft_dir)
-        layout.addWidget(self.path_label)
+        self._main_layout.addWidget(self.path_label)
 
         # Progress bar + loading gif
         progress_row = QHBoxLayout()
@@ -121,7 +126,7 @@ class MainWindow(QMainWindow):
             self._movie.setSpeed(200)
             self.loading_label.setMovie(self._movie)
 
-        layout.addLayout(progress_row)
+        self._main_layout.addLayout(progress_row)
 
         # Beta features
         if self._beta:
@@ -130,19 +135,54 @@ class MainWindow(QMainWindow):
             self.open_dir_btn.setFixedHeight(30)
             self.open_dir_btn.clicked.connect(self._open_minecraft_dir)
             beta_row.addWidget(self.open_dir_btn)
-            layout.addLayout(beta_row)
+            self._main_layout.addLayout(beta_row)
 
         # Launch button
         self.launch_btn = QPushButton("Играть")
         self.launch_btn.setFixedHeight(40)
         self.launch_btn.clicked.connect(self._on_launch)
-        layout.addWidget(self.launch_btn)
+        self._main_layout.addWidget(self.launch_btn)
 
         # Status bar
         self.status_bar = QStatusBar()
         self.status_bar.setSizeGripEnabled(False)
         self.status_bar.showMessage(f"BarsikLauncher {VERSION}")
         self.setStatusBar(self.status_bar)
+
+    def _toggle_picker(self):
+        if self._picker_win and self._picker_win.isVisible():
+            self._picker_win.hide()
+            return
+
+        installed = minecraft_launcher_lib.utils.get_installed_versions(self.minecraft_dir)
+        installed_ids = [v["id"] for v in installed]
+
+        if not self._picker_win:
+            self._picker_win = VersionPickerWindow(
+                by_type         = _BY_TYPE,
+                fabric_versions = FABRIC_VERSIONS,
+                forge_versions  = FORGE_VERSIONS,
+                latest          = _LATEST,
+                installed       = installed_ids,
+                current_version = self._selected_version,
+                current_loader  = self._selected_loader,
+            )
+            self._picker_win.version_chosen.connect(self._on_version_chosen)
+
+        # Позиционируем прямо под кнопкой версии
+        btn_pos = self.version_btn.mapToGlobal(self.version_btn.rect().bottomLeft())
+        self._picker_win.move(btn_pos)
+        self._picker_win.show()
+
+    def _on_version_chosen(self, vid, loader):
+        self._select(vid, loader)
+
+    def _select(self, version: str, loader):
+        self._selected_version = version
+        self._selected_loader  = loader
+        label = f"{version} [{loader}]" if loader else version
+        self.version_btn.setText(label)
+        self._save_config()
 
     def closeEvent(self, event):
         self._save_config()
@@ -154,54 +194,6 @@ class MainWindow(QMainWindow):
             (screen.width() - self.width()) // 2,
             (screen.height() - self.height()) // 2,
         )
-
-    def _open_version_menu(self):
-        menu = QMenu(self)
-
-        def add_versions(parent, versions, loader=None):
-            for v in versions:
-                action = parent.addAction(v)
-                action.triggered.connect(
-                    lambda checked, ver=v, ld=loader: self._select(ver, ld)
-                )
-
-        # Релизы
-        add_versions(menu, RELEASES)
-
-        # Снапшоты
-        if SNAPSHOTS:
-            snap_menu = menu.addMenu("Снапшоты")
-            add_versions(snap_menu, SNAPSHOTS)
-
-        # Беты
-        if BETAS:
-            beta_menu = menu.addMenu("Беты")
-            add_versions(beta_menu, BETAS)
-
-        # Альфы
-        if ALPHAS:
-            alpha_menu = menu.addMenu("Альфы")
-            add_versions(alpha_menu, ALPHAS)
-
-        menu.addSeparator()
-
-        # Модлоадеры
-        modloaders = menu.addMenu("Модлоадеры")
-
-        fabric_menu = modloaders.addMenu("Fabric")
-        add_versions(fabric_menu, FABRIC_VERSIONS, "fabric")
-
-        forge_menu = modloaders.addMenu("Forge")
-        add_versions(forge_menu, FORGE_VERSIONS, "forge")
-
-        menu.exec(self.version_btn.mapToGlobal(self.version_btn.rect().bottomLeft()))
-
-    def _select(self, version: str, loader: str | None):
-        self._selected_version = version
-        self._selected_loader  = loader
-        label = f"{version} [{loader}]" if loader else version
-        self.version_btn.setText(label)
-        self._save_config()
 
     def _open_settings(self):
         from settings import SettingsWindow
