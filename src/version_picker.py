@@ -1,21 +1,25 @@
+import os
+
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,
-    QPushButton, QLabel, QScrollArea, QFrame
+    QPushButton, QLabel, QScrollArea
 )
 from PySide6.QtCore import Qt, Signal, QThread
-from PySide6.QtGui import QFont, QColor, QPalette
+from PySide6.QtGui import QFont, QColor, QPalette, QMovie
 
+ASSETS_DIR  = os.path.join(os.path.dirname(__file__), "assets")
+LOADING_GIF = os.path.join(ASSETS_DIR, "loading.gif")
 
-TAG_COLORS = {
-    "Релиз":         ("#155724", "#c3e6cb"),
-    "Снапшот":       ("#856404", "#ffeeba"),
-    "Бета":          ("#7a3a00", "#ffd0a0"),
-    "Альфа":         ("#721c24", "#f5c6cb"),
-    "Fabric":        ("#333333", "#e8e8e8"),
-    "Forge":         ("#721c24", "#f5c6cb"),
-    "latest":        ("#155724", "#c3e6cb"),
-    "Не установлена":("#856404", "#ffeeba"),
-    "Установлена":   ("#0d4a1a", "#a8dab5"),
+TAG_STYLES = {
+    "Релиз":          "color:#155724; background:#c3e6cb; border:1px solid #b1dfbb;",
+    "Снапшот":        "color:#856404; background:#ffeeba; border:1px solid #ffd97d;",
+    "Бета":           "color:#7a3a00; background:#ffd0a0; border:1px solid #ffb870;",
+    "Альфа":          "color:#721c24; background:#f5c6cb; border:1px solid #f1aeb5;",
+    "Fabric":         "color:#333333; background:#e8e8e8; border:1px solid #cccccc;",
+    "Forge":          "color:#721c24; background:#f5c6cb; border:1px solid #f1aeb5;",
+    "latest":         "color:#155724; background:#c3e6cb; border:1px solid #b1dfbb;",
+    "Не установлена": "color:#856404; background:#ffeeba; border:1px solid #ffd97d;",
+    "Установлена":    "color:#0d4a1a; background:#a8dab5; border:1px solid #82c496;",
 }
 
 TYPE_LABELS = {
@@ -35,14 +39,16 @@ FILTER_FORGE    = "Forge"
 FILTERS = [FILTER_ALL, FILTER_RELEASE, FILTER_SNAPSHOT, FILTER_BETA, FILTER_ALPHA, FILTER_FABRIC, FILTER_FORGE]
 
 
-def _tag_label(text: str) -> QLabel:
-    fg, bg = TAG_COLORS.get(text, ("#333", "#e0e0e0"))
-    lbl = QLabel(text)
-    lbl.setStyleSheet(
-        f"background:{bg}; color:{fg}; border-radius:3px;"
-        f"padding:1px 4px; font-size:10px;"
+def _tag_btn(text: str) -> QPushButton:
+    style = TAG_STYLES.get(text, "color:#333; background:#e0e0e0; border:1px solid #bbb;")
+    btn = QPushButton(text)
+    btn.setFixedHeight(20)
+    btn.setAttribute(Qt.WA_TransparentForMouseEvents)
+    btn.setFocusPolicy(Qt.NoFocus)
+    btn.setStyleSheet(
+        f"QPushButton {{ {style} border-radius:3px; padding:0 5px; font-size:10px; }}"
     )
-    return lbl
+    return btn
 
 
 class BuildRowsWorker(QThread):
@@ -78,9 +84,12 @@ class BuildRowsWorker(QThread):
             for vid in ids:
                 if self.search_text and self.search_text not in vid.lower():
                     continue
-                for loader in ([None]
-                               + (["fabric"] if vid in self.fabric else [])
-                               + (["forge"]  if vid in self.forge  else [])):
+                loaders = [None]
+                if vid in self.fabric:
+                    loaders.append("fabric")
+                if vid in self.forge:
+                    loaders.append("forge")
+                for loader in loaders:
                     if not self._matches(vid, loader, type_key):
                         continue
                     tags = []
@@ -124,11 +133,11 @@ class VersionRow(QWidget):
                    else f"{version_id} с Forge" if loader == "forge"
                    else version_id)
         name = QLabel(display)
-        name.setFixedWidth(170)
+        name.setFixedWidth(160)
         layout.addWidget(name)
 
         for t in tags:
-            layout.addWidget(_tag_label(t))
+            layout.addWidget(_tag_btn(t))
 
         layout.addStretch()
 
@@ -165,11 +174,10 @@ class VersionPickerWindow(QWidget):
         self._active_filter  = FILTER_ALL
         self._worker         = None
 
-        self.setFixedWidth(560)
-        self.setFixedHeight(380)
-        self.setFrameStyle = lambda *a: None
-
+        self.setFixedSize(580, 380)
         self._build_ui()
+
+        # Запускаем загрузку сразу при создании
         self._refresh()
 
     def _build_ui(self):
@@ -181,7 +189,7 @@ class VersionPickerWindow(QWidget):
         self._search = QLineEdit()
         self._search.setPlaceholderText("Найти версию")
         self._search.setFixedHeight(28)
-        self._search.textChanged.connect(self._on_search_changed)
+        self._search.textChanged.connect(self._refresh)
         layout.addWidget(self._search)
 
         # Фильтры
@@ -210,7 +218,7 @@ class VersionPickerWindow(QWidget):
         hdr.setContentsMargins(24, 0, 4, 0)
         hdr.setSpacing(5)
         lbl_v = QLabel("Версия")
-        lbl_v.setFixedWidth(170)
+        lbl_v.setFixedWidth(160)
         lbl_v.setFont(QFont(lbl_v.font().family(), 9, QFont.Bold))
         lbl_t = QLabel("Теги")
         lbl_t.setFont(QFont(lbl_t.font().family(), 9, QFont.Bold))
@@ -219,12 +227,30 @@ class VersionPickerWindow(QWidget):
         hdr.addStretch()
         layout.addLayout(hdr)
 
-        # Стек: загрузка / список
-        self._loading_label = QLabel("Загрузка...")
-        self._loading_label.setAlignment(Qt.AlignCenter)
-        self._loading_label.setStyleSheet("color: gray;")
-        layout.addWidget(self._loading_label)
+        # Загрузка (гифка + текст)
+        self._loading_widget = QWidget()
+        loading_layout = QHBoxLayout(self._loading_widget)
+        loading_layout.setAlignment(Qt.AlignCenter)
+        loading_layout.setSpacing(8)
 
+        self._loading_gif = QLabel()
+        self._loading_gif.setFixedSize(18, 18)
+        self._movie = None
+        if os.path.exists(LOADING_GIF):
+            self._movie = QMovie(LOADING_GIF)
+            self._movie.setScaledSize(self._loading_gif.size())
+            self._movie.setSpeed(200)
+            self._movie.start()
+            self._loading_gif.setMovie(self._movie)
+        loading_layout.addWidget(self._loading_gif)
+
+        loading_text = QLabel("Загрузка...")
+        loading_text.setStyleSheet("color: gray;")
+        loading_layout.addWidget(loading_text)
+
+        layout.addWidget(self._loading_widget)
+
+        # Список
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -238,22 +264,24 @@ class VersionPickerWindow(QWidget):
         self._scroll.setVisible(False)
         layout.addWidget(scroll)
 
+    def _set_loading_visible(self, visible: bool):
+        self._loading_widget.setVisible(visible)
+        self._scroll.setVisible(not visible)
+
+    def update_current(self, version, loader):
+        self._current_ver    = version
+        self._current_loader = loader
+
     def _set_filter(self, f):
         self._active_filter = f
         for name, btn in self._filter_btns.items():
             btn.setChecked(name == f)
         self._refresh()
 
-    def _on_search_changed(self):
-        self._refresh()
-
     def _refresh(self):
-        # Показываем загрузку, скрываем список
-        self._scroll.setVisible(False)
-        self._loading_label.setVisible(True)
+        self._set_loading_visible(True)
         self._count_label.setText("")
 
-        # Чистим старые строки
         while self._list_layout.count() > 1:
             item = self._list_layout.takeAt(0)
             if item.widget():
@@ -279,14 +307,10 @@ class VersionPickerWindow(QWidget):
             self._list_layout.insertWidget(self._list_layout.count() - 1, row)
 
         self._count_label.setText(f"Найдено {len(rows)} версий")
-        self._loading_label.setVisible(False)
-        self._scroll.setVisible(True)
+        self._set_loading_visible(False)
 
     def _on_chosen(self, vid, loader):
         self._current_ver    = vid
         self._current_loader = loader
         self.version_chosen.emit(vid, loader)
-        self.hide()
-
-    def focusOutEvent(self, event):
         self.hide()
