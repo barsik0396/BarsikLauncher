@@ -2,16 +2,40 @@ import os
 
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QComboBox, QLineEdit, QPushButton, QStatusBar, QProgressBar, QLabel
+    QLineEdit, QPushButton, QStatusBar, QProgressBar, QLabel, QMenu
 )
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QMovie
+from PySide6.QtCore import Qt, QRect
+from PySide6.QtGui import QFont, QMovie, QPainter, QPen, QColor
+
+
+class DropButton(QPushButton):
+    """QPushButton со стрелкой вниз как у QComboBox."""
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        color = self.palette().buttonText().color()
+        pen = QPen(color)
+        pen.setWidth(2)
+        painter.setPen(pen)
+        r = self.rect()
+        ax = r.right() - 14
+        ay = r.center().y() - 2
+        painter.drawLine(ax, ay, ax + 4, ay + 4)
+        painter.drawLine(ax + 4, ay + 4, ax + 8, ay)
+        painter.end()
+
 
 from worker import LaunchWorker
 from constants import VERSION, VERSIONS
 
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 LOADING_GIF = os.path.join(ASSETS_DIR, "loading.gif")
+
+# Версии MC поддерживаемые модлоадерами
+FABRIC_VERSIONS = ["1.16.5", "1.20.1", "1.21.1", "1.21.2", "1.21.4", "1.21.5"]
+FORGE_VERSIONS  = ["1.12.2", "1.16.5", "1.20.1", "1.21.1", "1.21.4"]
 
 
 class MainWindow(QMainWindow):
@@ -20,6 +44,11 @@ class MainWindow(QMainWindow):
         self.minecraft_dir = minecraft_dir
         self._launch_worker = None
         self._progress_max = 100
+
+        # Текущий выбор: (version, loader)
+        # loader = None | "fabric" | "forge"
+        self._selected_version = "1.21.4"
+        self._selected_loader = None
 
         self.setWindowTitle("BarsikLauncher")
         self.setFixedSize(360, 210)
@@ -30,7 +59,7 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(16, 14, 16, 8)
         layout.setSpacing(8)
 
-        # Nickname + version side by side
+        # Nickname + version button side by side
         row = QHBoxLayout()
         row.setSpacing(8)
 
@@ -39,11 +68,17 @@ class MainWindow(QMainWindow):
         self.nick_input.setFixedHeight(32)
         row.addWidget(self.nick_input, stretch=3)
 
-        self.version_combo = QComboBox()
-        self.version_combo.addItems(VERSIONS)
-        self.version_combo.setCurrentText("1.21.4")
-        self.version_combo.setFixedHeight(32)
-        row.addWidget(self.version_combo, stretch=2)
+        self.version_btn = DropButton(self._selected_version)
+        self.version_btn.setFixedHeight(32)
+        self.version_btn.setStyleSheet("""
+            QPushButton {
+                text-align: left;
+                padding-left: 6px;
+                padding-right: 18px;
+            }
+        """)
+        self.version_btn.clicked.connect(self._open_version_menu)
+        row.addWidget(self.version_btn, stretch=2)
 
         layout.addLayout(row)
 
@@ -93,6 +128,40 @@ class MainWindow(QMainWindow):
         self.status_bar.showMessage(f"BarsikLauncher {VERSION}")
         self.setStatusBar(self.status_bar)
 
+    def _open_version_menu(self):
+        menu = QMenu(self)
+
+        # Обычные версии
+        for v in VERSIONS:
+            action = menu.addAction(v)
+            action.triggered.connect(lambda checked, ver=v: self._select(ver, None))
+
+        menu.addSeparator()
+
+        # Модлоадеры
+        modloaders = menu.addMenu("Модлоадеры")
+
+        fabric_menu = modloaders.addMenu("Fabric")
+        for v in FABRIC_VERSIONS:
+            action = fabric_menu.addAction(v)
+            action.triggered.connect(lambda checked, ver=v: self._select(ver, "fabric"))
+
+        forge_menu = modloaders.addMenu("Forge")
+        for v in FORGE_VERSIONS:
+            action = forge_menu.addAction(v)
+            action.triggered.connect(lambda checked, ver=v: self._select(ver, "forge"))
+
+        menu.exec(self.version_btn.mapToGlobal(self.version_btn.rect().bottomLeft()))
+
+    def _select(self, version: str, loader: str | None):
+        self._selected_version = version
+        self._selected_loader = loader
+
+        if loader:
+            self.version_btn.setText(f"{version} [{loader}]")
+        else:
+            self.version_btn.setText(version)
+
     def _set_loading(self, active: bool) -> None:
         self.loading_label.setVisible(active)
         if self._movie:
@@ -107,14 +176,18 @@ class MainWindow(QMainWindow):
             self.status_bar.showMessage("Введите никнейм")
             return
 
-        version = self.version_combo.currentText()
         self.launch_btn.setEnabled(False)
         self.progress_bar.setValue(0)
         self._progress_max = 100
         self.status_bar.showMessage("Подготовка...")
         self._set_loading(True)
 
-        self._launch_worker = LaunchWorker(version, username, self.minecraft_dir)
+        self._launch_worker = LaunchWorker(
+            self._selected_version,
+            username,
+            self.minecraft_dir,
+            self._selected_loader,
+        )
         self._launch_worker.progress.connect(self._on_progress)
         self._launch_worker.finished.connect(self._on_finished)
         self._launch_worker.error.connect(self._on_error)
