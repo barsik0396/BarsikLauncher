@@ -162,7 +162,6 @@ class VersionPickerWindow(QWidget):
                  latest, installed, current_version, current_loader):
         super().__init__()
         self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WA_ShowWithoutActivating)
 
         self._by_type        = by_type
         self._fabric         = fabric_versions
@@ -240,7 +239,6 @@ class VersionPickerWindow(QWidget):
             self._movie = QMovie(LOADING_GIF)
             self._movie.setScaledSize(self._loading_gif.size())
             self._movie.setSpeed(200)
-            self._movie.start()
             self._loading_gif.setMovie(self._movie)
         loading_layout.addWidget(self._loading_gif)
 
@@ -267,6 +265,11 @@ class VersionPickerWindow(QWidget):
     def _set_loading_visible(self, visible: bool):
         self._loading_widget.setVisible(visible)
         self._scroll.setVisible(not visible)
+        if self._movie:
+            if visible:
+                self._movie.start()
+            else:
+                self._movie.stop()
 
     def update_current(self, version, loader):
         self._current_ver    = version
