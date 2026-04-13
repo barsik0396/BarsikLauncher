@@ -1,11 +1,6 @@
 DEB_FOLDER         = 1.0.1-v1.1-n2
-BUILDER            = python3 -m nuitka
-BUILDER_FLAGS_1    = --onefile --enable-plugin=pyside6 --include-qt-plugins=sensible --follow-imports --output-dir=build/dist
-BUILDER_MAIN       = build/sources/main.py
-BUILDER_FLAGS_2    = --include-package-data=minecraft_launcher_lib 
-MAKE_DIST          = ${BUILDER} ${BUILDER_FLAGS_1} ${BUILDER_MAIN} ${BUILDER_FLAGS_2}
 
-.PHONY: deb
+.PHONY: deb build
 all: help
 
 help:
@@ -17,23 +12,54 @@ help:
 	@echo " - \033[32minstall\033[0m:    установить (надо \033[31mзапуск от sudo\033[0m и собранный BarsikLauncher)"
 	@echo " - \033[32muninstall\033[0m:  удалить, если установлен из исходников (надо \033[31mзапуск от sudo\033[0m)"
 	@echo " - \033[32minfo\033[0m:       информация о BarsikLauncher"
+	@echo " - \033[32mclean\033[0m:      удалить build/"
 	@echo "===================================="
 
 build:
 	@echo "== BarsikLauncher Builder"
 	@echo "== Создал: @barsik0396"
-	@echo "== PR сборщика: #10"
-	@echo ""
-	@echo "--> (30) Подготовка к сборке"
-	@echo "1: BLMake-WARN (31): "
-	@echo "2: BLMake-WARN (32): Сейчас происходит установка зависимостей для"
-	@echo "3: BLMake-WARN (33): Сборки, потребуется пароль."
-	@echo "4: BLMake-WARN (34): "
+	@echo "---> Подготовка к сборке"
 	sudo apt install pip
+	pip install nuitka PySide6 minecraft_launcher_lib --break-system-packages
 	mkdir build
-	pip install nuitka --break-system-packages 
-	pip install PySide6 minecraft_launcher_lib
 	cp -r src/ build/sources/
-	@echo "--> (40) Сборка"
-	${MAKE_DIST}
-	@echo "--> (42) Подготовка к сборке документации"
+	cp -r docs/ build/docs/
+	@echo "---> npm install"
+	cd build/docs; npm install
+	@echo "---> Компиляция документации"
+	cd build/docs; npm run build
+	@echo "---> Компиляция BarsikLauncher"
+	python -m nuitka --onefile --enable-plugin=pyside6 --include-qt-plugins=sensible --follow-imports --include-package-data=minecraft_launcher_lib --include-data-dir=build/sources/assets=assets --output-dir=build/dist build/sources/main.py
+	@echo "---> Копирование файлов"
+	mkdir build/output
+	cp build/dist/main.bin build/output/barsiklauncher
+	cp -r build/docs/dist/linux-unpacked/ build/output/docs/
+	@echo "---> Компиляция скрипта открытия документации"
+	g++ -std=c++17 -o build/barsiklauncher-docs open_docs.cpp
+	@echo ""
+	@echo "=============================================="
+	@echo "\033[32m СБОРКА ЗАВЕРШЕНА\033[0m!"
+	@echo "Установить из исходников:\033[32m sudo make install\033[0m"
+	@echo " (Для удаления -\033[32m sudo make uninstall\033[0m)"
+	@echo "Скомпилированные бинарные файлы и документация -\033[32m build/dist\033[0m"
+	@echo "=============================================="
+
+install:
+	mkdir /opt/BarsikLauncher-Docs/
+	cp -r build/output/docs/ /opt/BarsikLauncher-Docs/
+	cp build/output/barsiklauncher /usr/bin/barsiklauncher
+	@echo "Установка завершена!"
+
+uninstall:
+	rm -rf /opt/BarsikLauncher-Docs/
+	rm /usr/bin/barsiklauncher
+
+clean:
+	rm -rf build
+
+info:
+	@echo "=== BarsikLauncher Builder ==="
+	@echo " Версия: 0.1.0"
+	@echo " Создал: barsik0396"
+	@echo " Лицензия: MIT"
+	@echo " Pull Request: #12"
